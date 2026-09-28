@@ -36,10 +36,12 @@
   table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
   th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { color: var(--muted); font-weight: 600; }
-  td.decl { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; word-break: break-all; }
+  td.decl { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+  td { overflow-wrap: anywhere; }
   .v-accept { color: var(--accept); } .v-problem { color: var(--problem); } .v-question { color: var(--question); }
   .muted { color: var(--muted); }
   .links a { margin-right: 10px; white-space: nowrap; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; }
   @media (max-width: 640px) { .hide-sm { display: none; } }
 </style>
 </head>
@@ -82,33 +84,53 @@
 </main>
 <script>
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
-const WHAT = {accept: 'accepted', problem: 'problem', question: 'question'};
+// A Lean name, which may break after each dot.
+const lname = s => esc(s).replace(/\./g, '.<wbr>');
+const VERDICT = {accept: 'accepted', problem: 'problem', question: 'question'};
 function what(r) {
-  if (r.kind === 'review') return `<span class="v-${esc(r.verdict)}">${esc(WHAT[r.verdict] || r.verdict)}</span>` +
+  if (r.kind === 'review') return `<span class="v-${esc(r.verdict)}">${esc(VERDICT[r.verdict] || r.verdict)}</span>` +
     (r.category ? ` <span class="muted">${esc(r.category)}</span>` : '');
-  return esc({challenge: 'proposed test', test: 'test', named: 'named', comment: 'reply'}[r.kind] || r.kind);
+  if (r.kind === 'test') return `test: <code>${lname((r.test || {}).name)}</code>`;
+  if (r.kind === 'challenge') return 'proposed test';
+  if (r.kind === 'named') return `named “${esc(r.name)}”`;
+  return esc(r.kind);
 }
 function who(by) {
   if (!by) return '';
   const agent = by.agent ? `${esc(by.agent.tool || 'an agent')}${by.agent.model ? ' (' + esc(by.agent.model) + ')' : ''}` : '';
-  const login = by.login ? `@${esc(by.login)}` : '';
+  const login = (by.identity || {}).id ? `@${esc(by.identity.id)}` : '';
   return agent ? `${agent}${login ? ' via ' + login : ''}` : login;
 }
-fetch('site/data/evidence.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(data => {
-  const records = (data.records || []).filter(r => r.kind !== 'comment' && r.decl);
+function issueUrl(origin) {
+  const m = /^([^#\s]+)#(\d+)/.exec((origin || {}).ref || '');
+  return m ? `https://github.com/${m[1]}/issues/${m[2]}` : '';
+}
+fetch('records.jsonl').then(r => r.ok ? r.text() : Promise.reject(r.status)).then(text => {
+  const all = text.split('\n').filter(l => l.trim()).map(l => JSON.parse(l));
+  // Each record's latest state, from the statuses about it (by time, then id).
+  const statuses = all.filter(r => r.kind === 'status').sort((a, b) => (a.at + a.id).localeCompare(b.at + b.id));
+  const state = {};
+  for (const s of statuses) state[s.target] = s;
+  const records = all.filter(r => !['status', 'comment'].includes(r.kind) && r.subject)
+    .sort((a, b) => (b.at || '').localeCompare(a.at || ''));
   if (!records.length) {
     document.getElementById('records').innerHTML = '<p class="muted">None yet.</p>';
     return;
   }
-  const rows = records.map(r => `<tr>
-    <td class="decl">${esc(r.decl)}</td>
-    <td>${what(r)}${r.state && !['stands', 'open'].includes(r.state) ? ` <span class="muted">(${esc(r.state)})</span>` : ''}</td>
+  const rows = records.map(r => {
+    const decl = r.subject.name, s = state[r.id], url = issueUrl(r.origin);
+    const st = s ? ` <span class="muted">(${esc(s.state)}${s.test && s.test.name ? ' by <code>' + lname(s.test.name) + '</code>' : ''})</span>` : '';
+    return `<tr>
+    <td class="decl">${lname(decl)}</td>
+    <td>${what(r)}${st}</td>
     <td class="hide-sm">${who(r.by)}</td>
     <td class="hide-sm muted">${esc((r.at || '').slice(0, 10))}</td>
-    <td class="links"><a href="site/#/d/${encodeURIComponent(r.decl)}">site</a><a href="trust/?repo=probability&decl=${encodeURIComponent(r.decl)}">trust</a>${r.url ? `<a href="${esc(r.url)}">issue</a>` : ''}</td>
-  </tr>`).join('');
+    <td class="links"><a href="site/#/d/${encodeURIComponent(decl)}">site</a><a href="trust/?repo=probability&decl=${encodeURIComponent(decl)}">trust</a>${url ? `<a href="${esc(url)}">issue</a>` : ''}</td>
+  </tr>`;
+  }).join('');
   document.getElementById('records').innerHTML = `<table><thead><tr><th>Declaration</th><th>What</th>
-    <th class="hide-sm">By</th><th class="hide-sm">When</th><th>See it in</th></tr></thead><tbody>${rows}</tbody></table>`;
+    <th class="hide-sm">By</th><th class="hide-sm">When</th><th>See it in</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="muted">The claim page shows the records about what the strong law of large numbers rests on.</p>`;
 }).catch(() => {
   document.getElementById('records').innerHTML = '<p class="muted">The records could not be loaded.</p>';
 });
