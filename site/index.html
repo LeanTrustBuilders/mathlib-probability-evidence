@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shared evidence</title>
+<style>
+  :root {
+    --bg: #fbfaf7; --fg: #1d1d1b; --muted: #5d5b55; --line: #e2dfd6; --card: #ffffff;
+    --accent: #2f5d8a; --accept: #2e7d4f; --problem: #b3412e; --question: #8a6d1f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161614; --fg: #ecebe6; --muted: #a8a59c; --line: #34332f; --card: #1f1f1c;
+      --accent: #8db6e0; --accept: #6cc08f; --problem: #e58a78; --question: #d7b75e;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161614; --fg: #ecebe6; --muted: #a8a59c; --line: #34332f; --card: #1f1f1c;
+    --accent: #8db6e0; --accept: #6cc08f; --problem: #e58a78; --question: #d7b75e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 920px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 8px; }
+  h2 { font-size: 19px; margin: 36px 0 10px; }
+  p { margin: 8px 0; }
+  a { color: var(--accent); }
+  .lead { color: var(--muted); font-size: 17px; }
+  .ends { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+  .end { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .end h3 { margin: 0 0 6px; font-size: 17px; }
+  .end h3 a { text-decoration: none; }
+  .end p { color: var(--muted); font-size: 14.5px; margin: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  td.decl { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; word-break: break-all; }
+  .v-accept { color: var(--accept); } .v-problem { color: var(--problem); } .v-question { color: var(--question); }
+  .muted { color: var(--muted); }
+  .links a { margin-right: 10px; white-space: nowrap; }
+  @media (max-width: 640px) { .hide-sm { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>One evidence store, three front ends</h1>
+  <p class="lead">Reviews, questions and proposed tests about Mathlib's probability theory live in one
+  place: the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">evidence
+  store</a> of this repository, as records in git. Each front end below reads the same records against
+  the same dataset of Mathlib, so a review written once shows up in all three, with its status against
+  the current code.</p>
+
+  <div class="ends">
+    <div class="end">
+      <h3><a href="site/">The site</a></h3>
+      <p>Mathlib's probability theory read as a referee does: claims, what they rest on, every
+      declaration with its reviews, and coverage under the reader's choice of whose reviews count.</p>
+    </div>
+    <div class="end">
+      <h3><a href="trust/">trust's front end</a></h3>
+      <p>The dependency tree of a declaration, with what reviewers accepted marked as trusted and
+      what changed since a review marked as such.</p>
+    </div>
+    <div class="end">
+      <h3><a href="claim/">One claim's page</a></h3>
+      <p>The strong law of large numbers: the statement, what it rests on, and every review,
+      question and reply about those declarations, as threads.</p>
+    </div>
+  </div>
+
+  <h2>Add to it</h2>
+  <p>Anyone with a GitHub account can review a declaration, report a problem, ask a question or
+  propose a test, with the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/issues/new/choose">issue
+  forms</a> (or the buttons on each front end). A bot turns the issue into a record, and the three
+  front ends are rebuilt. Records are never anonymous: each names the GitHub account it came from, and
+  an AI agent's are labelled as such.</p>
+
+  <h2>The records</h2>
+  <div id="records"><p class="muted">Loading…</p></div>
+</main>
+<script>
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const WHAT = {accept: 'accepted', problem: 'problem', question: 'question'};
+function what(r) {
+  if (r.kind === 'review') return `<span class="v-${esc(r.verdict)}">${esc(WHAT[r.verdict] || r.verdict)}</span>` +
+    (r.category ? ` <span class="muted">${esc(r.category)}</span>` : '');
+  return esc({challenge: 'proposed test', test: 'test', named: 'named', comment: 'reply'}[r.kind] || r.kind);
+}
+function who(by) {
+  if (!by) return '';
+  const agent = by.agent ? `${esc(by.agent.tool || 'an agent')}${by.agent.model ? ' (' + esc(by.agent.model) + ')' : ''}` : '';
+  const login = by.login ? `@${esc(by.login)}` : '';
+  return agent ? `${agent}${login ? ' via ' + login : ''}` : login;
+}
+fetch('site/data/evidence.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(data => {
+  const records = (data.records || []).filter(r => r.kind !== 'comment' && r.decl);
+  if (!records.length) {
+    document.getElementById('records').innerHTML = '<p class="muted">None yet.</p>';
+    return;
+  }
+  const rows = records.map(r => `<tr>
+    <td class="decl">${esc(r.decl)}</td>
+    <td>${what(r)}${r.state && !['stands', 'open'].includes(r.state) ? ` <span class="muted">(${esc(r.state)})</span>` : ''}</td>
+    <td class="hide-sm">${who(r.by)}</td>
+    <td class="hide-sm muted">${esc((r.at || '').slice(0, 10))}</td>
+    <td class="links"><a href="site/#/d/${encodeURIComponent(r.decl)}">site</a><a href="trust/?repo=probability&decl=${encodeURIComponent(r.decl)}">trust</a>${r.url ? `<a href="${esc(r.url)}">issue</a>` : ''}</td>
+  </tr>`).join('');
+  document.getElementById('records').innerHTML = `<table><thead><tr><th>Declaration</th><th>What</th>
+    <th class="hide-sm">By</th><th class="hide-sm">When</th><th>See it in</th></tr></thead><tbody>${rows}</tbody></table>`;
+}).catch(() => {
+  document.getElementById('records').innerHTML = '<p class="muted">The records could not be loaded.</p>';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+ "spec": "ltb-evidence-store/0",
+ "library": {
+  "repo": "leanprover-community/mathlib4",
+  "root": "Mathlib"
+ },
+ "datasets": {
+  "repo": "LeanTrustBuilders/mathlib-explorer",
+  "tag": "mathlib-dataset-{commit12}",
+  "asset": "dataset.tar.gz"
+ },
+ "claims": [
+  "ProbabilityTheory.strong_law_ae",
+  "ProbabilityTheory.tendstoInDistribution_inv_sqrt_mul_sum_sub",
+  "MeasureTheory.submartingale_iff_expected_stoppedValue_mono",
+  "ProbabilityTheory.cond_eq_inv_mul_cond_mul",
+  "MeasureTheory.TendstoInDistribution.continuous_comp_prodMk_of_tendstoInMeasure_const",
+  "MeasureTheory.ProbabilityMeasure.tendsto_iff_tendsto_charFun",
+  "MeasureTheory.TendstoInDistribution.continuous_comp",
+  "ProbabilityTheory.IsGaussian.exists_integrable_exp_sq",
+  "ProbabilityTheory.tendsto_choose_mul_pow_of_tendsto_mul_atTop"
+ ],
+ "maintainers": []
+}

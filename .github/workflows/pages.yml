@@ -1,0 +1,94 @@
+# The three front ends of the store, built from one dataset and one store (evidence/), and published
+# together: the site of Mathlib's probability theory (site/), one claim's page (claim/), and trust's
+# front end (trust/). Intake runs this after it records something, so every front end shows every
+# record.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths: ['evidence/**', 'site/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: trust-site, with evidence-core and evidence-store
+        run: pip install -q git+https://github.com/LeanTrustBuilders/referee-site
+      - name: The dataset, with the Mathlib catalogue
+        run: |
+          # The newest dataset the store's config points to (Mathlib Explorer's releases), and the
+          # Mathlib catalogue's (domains, characterizations written outside Mathlib) merged in when
+          # both describe the same Mathlib.
+          d=$(evidence-store dataset --store evidence --out "$RUNNER_TEMP/ds" | tail -1)
+          ctag=$(gh release list -R LeanTrustBuilders/mathlib-catalogue --limit 100 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | startswith("dataset-"))] | sort_by(.createdAt) | last | .tagName // ""')
+          if [ -n "$ctag" ]; then
+            mkdir -p "$RUNNER_TEMP/catalogue"
+            gh release download "$ctag" -R LeanTrustBuilders/mathlib-catalogue -p dataset.tar.gz -D "$RUNNER_TEMP/catalogue-release"
+            tar -xzf "$RUNNER_TEMP/catalogue-release/dataset.tar.gz" -C "$RUNNER_TEMP/catalogue"
+            if evidence-core merge --dataset "$d" --add "$RUNNER_TEMP/catalogue" --out "$RUNNER_TEMP/merged"; then
+              d="$RUNNER_TEMP/merged"
+            else
+              echo "::warning::the Mathlib catalogue ($ctag) was not built against this Mathlib"
+            fi
+          fi
+          echo "DATASET=$d" >> "$GITHUB_ENV"
+          echo "CLAIMS=$(jq -r '.claims[] | "--claim " + .' evidence/store.json | paste -sd' ')" >> "$GITHUB_ENV"
+      - name: Mathlib at the dataset's commit
+        run: |
+          # The history without file contents dates each module, and is small to fetch.
+          git clone -q --filter=blob:none --no-checkout https://github.com/leanprover-community/mathlib4 "$RUNNER_TEMP/mathlib"
+          git -C "$RUNNER_TEMP/mathlib" checkout -q "$(jq -r .library.commit "$DATASET/meta.json")"
+      - name: The site of Mathlib's probability theory
+        run: |
+          trust-site build --dataset "$DATASET" --source "$RUNNER_TEMP/mathlib" --evidence evidence \
+            --modules Mathlib.Probability --modules Mathlib.InformationTheory $CLAIMS \
+            --title "Mathlib: probability" --repo leanprover-community/mathlib4 \
+            --issues-repo "$GITHUB_REPOSITORY" --out _site/site
+      - name: One claim's page
+        run: |
+          trust-site claim --dataset "$DATASET" --store evidence --source "$RUNNER_TEMP/mathlib" \
+            --repo "$GITHUB_REPOSITORY" --out _site/claim
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: trust's front end
+        run: |
+          git clone -q --depth 1 https://github.com/LeanTrustBuilders/trust-web "$RUNNER_TEMP/trust-web"
+          (cd "$RUNNER_TEMP/trust-web" && npm ci --no-audit --no-fund &&
+            VITE_TRUST_SERVER=none VITE_MARKS_API=none VITE_DEFAULT_INDEX=probability npm run build)
+          mkdir -p _site/trust && cp -r "$RUNNER_TEMP/trust-web/dist/." _site/trust/
+          trust-site trust-index --dataset "$DATASET" --out _site/trust/index --name probability \
+            --evidence evidence --modules Mathlib.Probability --modules Mathlib.InformationTheory \
+            --decl-url "../site/#/d/{name}" --start "$(jq -r '.claims[0]' evidence/store.json)"
+      - name: The landing page
+        run: cp site/index.html _site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
