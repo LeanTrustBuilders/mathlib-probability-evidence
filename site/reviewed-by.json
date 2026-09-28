@@ -1,0 +1,13 @@
+{
+ "repo": "LeanTrustBuilders/mathlib-probability-evidence",
+ "library": {
+  "name": "Mathlib",
+  "repo": "leanprover-community/mathlib4",
+  "title": "Mathlib's probability theory",
+  "root": "ProbabilityTheory",
+  "modules": [
+   "Mathlib.Probability",
+   "Mathlib.InformationTheory"
+  ]
+ }
+}

@@ -47,11 +47,11 @@
 </head>
 <body>
 <main>
-  <h1>One evidence store, three front ends</h1>
+  <h1>One evidence store, four front ends</h1>
   <p class="lead">Reviews, questions and proposed tests about Mathlib's probability theory live in one
   place: the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">evidence
   store</a> of this repository, as records in git. Each front end below reads the same records against
-  the same dataset of Mathlib, so a review written once shows up in all three, with its status against
+  the same dataset of Mathlib, so a review written once shows up in all four, with its status against
   the current code.</p>
 
   <div class="ends">
@@ -70,12 +70,17 @@
       <p>The strong law of large numbers: the statement, what it rests on, and every review,
       question and reply about those declarations, as threads.</p>
     </div>
+    <div class="end">
+      <h3><a href="reviewed-by/">Reviewed-by</a></h3>
+      <p>Every declaration of Mathlib's probability theory, searchable, with its review marks and
+      tests, and a form to add one from the browser.</p>
+    </div>
   </div>
 
   <h2>Add to it</h2>
   <p>Anyone with a GitHub account can review a declaration, report a problem, ask a question or
   propose a test, with the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/issues/new/choose">issue
-  forms</a> (or the buttons on each front end). A bot turns the issue into a record, and the three
+  forms</a> (or the buttons on each front end). A bot turns the issue into a record, and the four
   front ends are rebuilt. Records are never anonymous: each names the GitHub account it came from, and
   an AI agent's are labelled as such.</p>
 
@@ -125,7 +130,7 @@ fetch('records.jsonl').then(r => r.ok ? r.text() : Promise.reject(r.status)).the
     <td>${what(r)}${st}</td>
     <td class="hide-sm">${who(r.by)}</td>
     <td class="hide-sm muted">${esc((r.at || '').slice(0, 10))}</td>
-    <td class="links"><a href="site/#/d/${encodeURIComponent(decl)}">site</a><a href="trust/?repo=probability&decl=${encodeURIComponent(decl)}">trust</a>${url ? `<a href="${esc(url)}">issue</a>` : ''}</td>
+    <td class="links"><a href="site/#/d/${encodeURIComponent(decl)}">site</a><a href="trust/?repo=probability&decl=${encodeURIComponent(decl)}">trust</a><a href="reviewed-by/#d=${encodeURIComponent(decl)}">Reviewed-by</a>${url ? `<a href="${esc(url)}">issue</a>` : ''}</td>
   </tr>`;
   }).join('');
   document.getElementById('records').innerHTML = `<table><thead><tr><th>Declaration</th><th>What</th>

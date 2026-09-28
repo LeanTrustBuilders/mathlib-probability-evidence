@@ -1,6 +1,6 @@
-# The three front ends of the store, built from one dataset and one store (evidence/), and published
-# together: the site of Mathlib's probability theory (site/), one claim's page (claim/), and trust's
-# front end (trust/). Intake runs this after it records something, so every front end shows every
+# The four front ends of the store, built from one dataset and one store (evidence/), and published
+# together: the site of Mathlib's probability theory (site/), one claim's page (claim/), trust's
+# front end (trust/), and Reviewed-by (reviewed-by/). Intake runs this after it records something, so every front end shows every
 # record.
 name: Pages
 
@@ -66,6 +66,13 @@ jobs:
         run: |
           trust-site claim --dataset "$DATASET" --store evidence --source "$RUNNER_TEMP/mathlib" \
             --repo "$GITHUB_REPOSITORY" --out _site/claim
+      - name: Reviewed-by
+        run: |
+          git clone -q --depth 1 https://github.com/LeanTrustBuilders/reviewed-by-pilot "$RUNNER_TEMP/rb"
+          python3 "$RUNNER_TEMP/rb/scripts/dataset_declarations.py" --dataset "$DATASET" --clone "$RUNNER_TEMP/mathlib" \
+            --settings site/reviewed-by.json --out "$RUNNER_TEMP/rb-declarations.json"
+          python3 "$RUNNER_TEMP/rb/scripts/build_site.py" --dataset "$DATASET" --store evidence \
+            --settings site/reviewed-by.json --index "$RUNNER_TEMP/rb-declarations.json" --out _site/reviewed-by
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

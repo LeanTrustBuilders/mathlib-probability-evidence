@@ -1,7 +1,7 @@
 # Evidence about Mathlib's probability theory
 
 An evidence store about [Mathlib](https://github.com/leanprover-community/mathlib4)'s probability
-theory, and three front ends that show it, published at
+theory, and four front ends that show it, published at
 <https://leantrustbuilders.github.io/mathlib-probability-evidence/>:
 
 - **the site** (`site/`): Mathlib's probability theory read as a referee does, with every
@@ -9,9 +9,10 @@ theory, and three front ends that show it, published at
 - **trust's front end** (`trust/`): the dependency tree of a declaration, with what reviewers accepted
   marked as trusted;
 - **one claim's page** (`claim/`): the strong law of large numbers, with every review of what it
-  rests on.
+  rests on;
+- **Reviewed-by** (`reviewed-by/`): every declaration, searchable, with its review marks and tests.
 
-All three read the same records (`evidence/`) against the same dataset of Mathlib, so a record shows
+All four read the same records (`evidence/`) against the same dataset of Mathlib, so a record shows
 up in each, with its status against the current code.
 
 ## Adding to it
@@ -31,8 +32,10 @@ such.
 - `.github/workflows/evidence-intake.yml` and `evidence-check.yml`: the store, by
   [evidence-store](https://github.com/LeanTrustBuilders/evidence-store).
 - `.github/workflows/pages.yml`: the newest dataset, with the
-  [Mathlib catalogue](https://github.com/LeanTrustBuilders/mathlib-catalogue) merged in, and the three
+  [Mathlib catalogue](https://github.com/LeanTrustBuilders/mathlib-catalogue) merged in, and the four
   front ends from it: `trust-site build` and `trust-site claim` from
-  [referee-site](https://github.com/LeanTrustBuilders/referee-site), and
-  [trust-web](https://github.com/LeanTrustBuilders/trust-web) on `trust-site trust-index --modules`.
+  [referee-site](https://github.com/LeanTrustBuilders/referee-site),
+  [trust-web](https://github.com/LeanTrustBuilders/trust-web) on `trust-site trust-index --modules`, and
+  the page of [Reviewed-by](https://github.com/LeanTrustBuilders/reviewed-by-pilot) with the settings
+  `site/reviewed-by.json`.
 - `site/index.html`: the landing page, which lists the records with links into each front end.
