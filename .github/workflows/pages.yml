@@ -46,7 +46,7 @@ jobs:
             if evidence-core merge --dataset "$d" --add "$RUNNER_TEMP/catalogue" --out "$RUNNER_TEMP/merged"; then
               d="$RUNNER_TEMP/merged"
             else
-              echo "::warning::the Mathlib catalogue ($ctag) was not built against this Mathlib"
+              echo "::warning::merging the Mathlib catalogue ($ctag) failed (its error is above); the site is built without it"
             fi
           fi
           echo "DATASET=$d" >> "$GITHUB_ENV"
