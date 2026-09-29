@@ -77,15 +77,14 @@
 </head>
 <body>
 <main>
-  <h1>One evidence store, shared</h1>
-  <p class="lead">Reviews, questions and proposed tests about Mathlib's probability theory are records
-  in the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">evidence
-  store</a> of this repository. A record names its declaration by what the declaration means, not by
-  the library it was made in, so it applies wherever that declaration is used: the front ends here
-  show it on Mathlib, and libraries built on Mathlib show it on their own pages, beside their own
-  reviews.</p>
+  <h1>Shared evidence about Mathlib's probability theory</h1>
+  <p class="lead">Lean checks every proof, but not whether a definition, or the statement of a
+  theorem, says what was meant. That takes someone reading it. This demo collects such readings of
+  Mathlib's probability theory (reviews, reported problems, questions and proposed tests), shows them
+  beside the code, and shares them with the libraries built on Mathlib. It is made with the open
+  tools of <a href="https://github.com/LeanTrustBuilders">LeanTrustBuilders</a>.</p>
 
-  <h2>Here: Mathlib's probability theory</h2>
+  <h2>Three views of it</h2>
   <div class="ends">
     <div class="end">
       <h3><a href="site/">Referee site</a></h3>
@@ -104,49 +103,50 @@
     </div>
   </div>
 
-  <h2>Downstream: libraries that import this store</h2>
+  <h2>Where the evidence is kept</h2>
+  <p>Each review, problem, question or test is a record: a line of JSON in a git repository, the
+  library's <b>evidence store</b>. This one is
+  <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">evidence/</a>
+  in this repository. A record names its declaration by a hash of what the declaration means. So a
+  page can tell whether a review still applies to the current code or was made on an earlier
+  version, and the record applies in every library that uses the declaration.</p>
+
+  <h2>Shared with the libraries built on Mathlib</h2>
+  <p>Two libraries built on Mathlib keep evidence stores of their own, and the three stores import
+  each other. A review of a Mathlib definition filed in any of them shows on every page where the
+  definition is used, marked with the store it comes from.</p>
   <div class="ends">
     <div class="end">
-      <h3><a href="https://leantrustbuilders.github.io/reviewed-by-pilot/#d=ProbabilityTheory.variance">Tau Ceti's Reviewed-by page</a></h3>
-      <p>Tau Ceti keeps its reviews in <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot/tree/main/evidence">its
-      own store</a>, and imports this one: the reviews made here of <code>variance</code>,
-      <code>IndepFun</code>, <code>IdentDistrib</code> and the strong law, which Tau Ceti rests on, show on its
-      page, marked as coming from this store.</p>
+      <h3><a href="https://leantrustbuilders.github.io/reviewed-by-pilot/#d=ProbabilityTheory.variance">Tau Ceti's review page</a></h3>
+      <p>Tau Ceti rests on <code>variance</code>, <code>IndepFun</code>, <code>IdentDistrib</code> and
+      the strong law. The reviews of them made here show on its page, beside the reviews in
+      <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot/tree/main/evidence">its own store</a>.</p>
     </div>
     <div class="end">
       <h3><a href="https://leantrustbuilders.github.io/site-pilot/lml/#/community">LeanMachineLearning's site</a></h3>
-      <p>Its <a href="https://github.com/LeanTrustBuilders/site-pilot/tree/main/evidence">store</a> imports this
-      one too: wherever one of its declarations rests on a Mathlib definition reviewed here, the list
-      of what it rests on says so.</p>
+      <p>Wherever one of its declarations rests on a Mathlib definition reviewed here, the list of what
+      it rests on says so. Its own reviews go to <a href="https://github.com/LeanTrustBuilders/site-pilot/tree/main/evidence">its
+      store</a>.</p>
     </div>
   </div>
-
-  <h2>How sharing works</h2>
   <ul>
-    <li><b>A store names the stores it imports</b>, in its <code>store.json</code>. Tau Ceti's and
-    LeanMachineLearning's name this one, and this one names theirs, so a review of a Mathlib
-    declaration filed from either library shows here too. An import is one level deep: a store's own
-    imports are not followed.</li>
-    <li><b>Only what applies is shown.</b> A record from another store appears where its declaration
-    is one of the dataset's, with its status against it: current, or made on an earlier version.
-    Records about the other library's own declarations are left out.</li>
-    <li><b>Each store keeps its rules.</b> Only a record's own store, or its author, can change its
-    state (withdraw it, mark a problem fixed), so a page shows an imported record without the buttons
-    that would.</li>
+    <li><b>Only what applies is shown.</b> Records about Tau Ceti's own declarations, for example,
+    do not appear here.</li>
+    <li><b>Each store keeps its rules.</b> Only a record's own store, or its author, can withdraw it
+    or mark a problem fixed.</li>
     <li><b>The reader decides whether it counts.</b> A switch in the reader's policy says whether
-    reviews from imported stores count towards a claim's coverage.</li>
-    <li><b>Nothing is copied.</b> Each build fetches the imported stores afresh and says at which commit
-    (below). The rules are S3's <a href="https://github.com/LeanTrustBuilders/specs/blob/main/S3-evidence.md#imported-records">imported
-    records</a>.</li>
+    reviews from other stores count towards a claim's coverage.</li>
+    <li><b>Nothing is copied.</b> Each build reads the other stores afresh, at a commit it shows
+    (below), and does not follow their own imports. The rules are S3's
+    <a href="https://github.com/LeanTrustBuilders/specs/blob/main/S3-evidence.md#imported-records">imported records</a>.</li>
   </ul>
 
   <h2>Add to it</h2>
   <p>Anyone with a GitHub account can review a declaration, report a problem, ask a question or
   propose a test, with the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/issues/new/choose">issue
-  forms</a> (or the buttons on each front end). A bot turns the issue into a record, and the front
-  ends are rebuilt. A review of a Mathlib declaration filed from Tau Ceti's page or LeanMachineLearning's
-  site is kept in that library's store, and shows here too. Records are never anonymous: each names
-  the GitHub account it came from, and an AI agent's are labelled as such.</p>
+  forms</a>, or the buttons in each view. A bot turns the issue into a record, and the views are
+  rebuilt. Records are never anonymous: each names the GitHub account it came from, and an AI
+  agent's are labelled as such.</p>
 
   <h2>How it is made</h2>
   <p>Each piece is open, in its own repository of
@@ -193,7 +193,8 @@
 
   <figure class="suite">
     <figcaption>How the repositories fit together: only the Lean side reads compiled Lean files; every
-    other tool reads the dataset (S2) and the records (S3).</figcaption>
+    other tool reads the datasets (S2) and the records (S3). Each library has its own datasets and its
+    own store, and stores import each other.</figcaption>
     <div class="suite-scroll">
     <svg viewBox="20 56 724 808" role="img" aria-labelledby="suite-title">
       <title id="suite-title">The LeanTrustBuilders repositories: a Lean side that writes datasets, the specifications, evidence-core, and the front ends</title>
@@ -256,13 +257,17 @@
         <text class="q" x="56" y="508">a GitHub release per commit</text>
         <text class="q" x="56" y="524">no Lean needed to read it</text>
       </a>
-      <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">
-        <rect class="box data" x="256" y="452" width="200" height="88" rx="8"/>
-        <text class="b" x="272" y="476">S3 evidence store</text>
-        <text class="q" x="272" y="492">reviews, problems, tests…</text>
-        <text class="q" x="272" y="508">JSONL in git, append-only</text>
-        <text class="q" x="272" y="524">here: evidence/ in this repo</text>
+      <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot/tree/main/evidence">
+        <rect class="box data" x="264" y="460" width="192" height="80" rx="8"/>
       </a>
+      <a href="https://github.com/LeanTrustBuilders/site-pilot/tree/main/evidence">
+        <rect class="box data" x="260" y="456" width="192" height="80" rx="8"/>
+      </a>
+      <rect class="box data" x="256" y="452" width="192" height="80" rx="8"/>
+      <text class="b" x="272" y="474">S3 evidence stores</text>
+      <text class="q" x="272" y="490">one per library, in git;</text>
+      <text class="q" x="272" y="506">they import each other</text>
+      <text class="here" x="272" y="522">here: <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">ours</a>, <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot/tree/main/evidence">Tau Ceti</a>, <a href="https://github.com/LeanTrustBuilders/site-pilot/tree/main/evidence">LML</a></text>
       <a href="https://github.com/LeanTrustBuilders/evidence-store">
         <rect class="box" x="512" y="452" width="200" height="88" rx="8"/>
         <text class="b" x="528" y="476">evidence-store</text>
@@ -304,10 +309,10 @@
       <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot">
         <rect class="box" x="544" y="748" width="152" height="88" rx="8"/>
         <text class="b" x="560" y="772">reviewed-by-pilot</text>
-        <text class="q" x="560" y="788">Tau Ceti's page, the</text>
-        <text class="q" x="560" y="804">suite behind it</text>
+        <text class="q" x="560" y="788">Tau Ceti's page, with</text>
+        <text class="q" x="560" y="804">a store of its own</text>
       </a>
-      <text class="here" x="560" y="822">imports this store: <a href="https://leantrustbuilders.github.io/reviewed-by-pilot/">page</a></text>
+      <text class="here" x="560" y="822">imports ours: <a href="https://leantrustbuilders.github.io/reviewed-by-pilot/">page</a></text>
 
       <g class="wire">
         <path d="M272 152H232" marker-end="url(#suite-arrow)"/>
@@ -330,7 +335,7 @@
     </svg>
     </div>
     <p class="key">Each box links to its repository. Dashed: not ours · tinted: data files · blue: the
-    specifications, and the front ends built here.</p>
+    specifications, and links to the pieces of this demo.</p>
   </figure>
 
   <h2>The records</h2>
