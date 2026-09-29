@@ -42,6 +42,14 @@
   .muted { color: var(--muted); }
   .links a { margin-right: 10px; white-space: nowrap; }
   code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; }
+  ol.steps { padding-left: 22px; }
+  ol.steps li { margin: 8px 0; }
+  .build { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin-top: 16px; }
+  .build h3 { font-size: 15px; margin: 0 0 6px; }
+  .build table { font-size: 14px; }
+  .build th { width: 9em; font-weight: 600; }
+  .build td, .build th { padding: 5px 6px; }
+  .build tr:last-child td, .build tr:last-child th { border-bottom: 0; }
   @media (max-width: 640px) { .hide-sm { display: none; } }
 </style>
 </head>
@@ -56,7 +64,7 @@
 
   <div class="ends">
     <div class="end">
-      <h3><a href="site/">The site</a></h3>
+      <h3><a href="site/">Referee site</a></h3>
       <p>Mathlib's probability theory read as a referee does: claims, what they rest on, every
       declaration with its reviews, and coverage under the reader's choice of whose reviews count.</p>
     </div>
@@ -83,6 +91,47 @@
   forms</a> (or the buttons on each front end). A bot turns the issue into a record, and the four
   front ends are rebuilt. Records are never anonymous: each names the GitHub account it came from, and
   an AI agent's are labelled as such.</p>
+
+  <h2>How it is made</h2>
+  <p>Each piece is open, in its own repository of
+  <a href="https://github.com/LeanTrustBuilders">LeanTrustBuilders</a>, and they fit together through
+  three specifications, so that any of them can be replaced by another tool that follows them.</p>
+  <ol class="steps">
+    <li><b>Mathlib, read by Lean.</b> The
+    <a href="https://github.com/LeanTrustBuilders/extractor">extractor</a> (<code>trust-extract</code>)
+    reads the compiled library at one commit into a <b>dataset</b>: every declaration, with hashes of
+    what it means, the graphs of what each one rests on, and facets such as docstrings, statements
+    taken apart and where each is written. It can also have Lean's kernel check each declaration
+    against only what the graph says it rests on.
+    <a href="https://github.com/LeanTrustBuilders/mathlib-explorer">Mathlib Explorer</a>, a site for
+    reading Mathlib, extracts a dataset for each Mathlib release and keeps it as a release of its
+    repository; this demo uses those. The
+    <a href="https://github.com/LeanTrustBuilders/mathlib-catalogue">Mathlib catalogue</a>, a Lean
+    package that states the domains and characterizations of Mathlib's definitions from outside
+    Mathlib, has a dataset of its own, merged into Mathlib's.</li>
+    <li><b>The specifications.</b> <a href="https://github.com/LeanTrustBuilders/specs">specs</a>:
+    S1 names a declaration as it was (its name at a commit, and hashes of its meaning), S2 is the
+    dataset, and S3 the evidence records and stores, with the rubric a review says what it checked
+    against.</li>
+    <li><b>The evidence.</b> The records are the files of
+    <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">evidence/</a>
+    in this repository. <a href="https://github.com/LeanTrustBuilders/evidence-store">evidence-store</a>
+    turns the issues opened with the forms into records, keyed by the declaration's hashes in the
+    dataset, and checks every change to the store.
+    <a href="https://github.com/LeanTrustBuilders/evidence-core">evidence-core</a> reads the records
+    against the dataset: whether each still applies to the current code, what changed underneath it,
+    whether a claim is covered under a reader's policy, and what to review next.</li>
+    <li><b>The front ends.</b> <a href="https://github.com/LeanTrustBuilders/referee-site">referee-site</a>
+    builds the Referee site and the claim's page, and the index that trust's front end
+    (<a href="https://github.com/LeanTrustBuilders/trust-web">trust-web</a>) reads;
+    <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot">Reviewed-by</a> builds its page
+    from the same dataset and store. This repository's
+    <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/blob/main/.github/workflows/pages.yml">Pages
+    workflow</a> builds all four after every new record.</li>
+  </ol>
+  <p>The design behind the suite is in
+  <a href="https://github.com/LeanTrustBuilders/design">LeanTrustBuilders/design</a>.</p>
+  <div id="build"></div>
 
   <h2>The records</h2>
   <div id="records"><p class="muted">Loading…</p></div>
@@ -130,7 +179,7 @@ fetch('records.jsonl').then(r => r.ok ? r.text() : Promise.reject(r.status)).the
     <td>${what(r)}${st}</td>
     <td class="hide-sm">${who(r.by)}</td>
     <td class="hide-sm muted">${esc((r.at || '').slice(0, 10))}</td>
-    <td class="links"><a href="site/#/d/${encodeURIComponent(decl)}">site</a><a href="trust/?repo=probability&decl=${encodeURIComponent(decl)}">trust</a><a href="reviewed-by/#d=${encodeURIComponent(decl)}">Reviewed-by</a>${url ? `<a href="${esc(url)}">issue</a>` : ''}</td>
+    <td class="links"><a href="site/#/d/${encodeURIComponent(decl)}">Referee</a><a href="trust/?repo=probability&decl=${encodeURIComponent(decl)}">trust</a><a href="reviewed-by/#d=${encodeURIComponent(decl)}">Reviewed-by</a>${url ? `<a href="${esc(url)}">issue</a>` : ''}</td>
   </tr>`;
   }).join('');
   document.getElementById('records').innerHTML = `<table><thead><tr><th>Declaration</th><th>What</th>
@@ -139,6 +188,26 @@ fetch('records.jsonl').then(r => r.ok ? r.text() : Promise.reject(r.status)).the
 }).catch(() => {
   document.getElementById('records').innerHTML = '<p class="muted">The records could not be loaded.</p>';
 });
+// This build: the dataset and the tools it was made with (build.json, written by the Pages workflow).
+const gh = (repo, path, text) => `<a href="https://github.com/${esc(repo)}${path}">${text}</a>`;
+fetch('build.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(b => {
+  const lib = b.library, p = b.producer || {}, t = b.tools || {};
+  const rows = [
+    ['Mathlib', `${gh(lib.repo, '/tree/' + lib.commit, '<code>' + esc(lib.commit.slice(0, 12)) + '</code>')}, Lean ${esc(b.lean)}`],
+    ['Dataset', `${gh(b.dataset.repo, '/releases/tag/' + b.dataset.tag, esc(b.dataset.tag))} of ${gh(b.dataset.repo, '', esc(b.dataset.repo.split('/')[1]))}` +
+      `, read by ${esc(p.name || 'the extractor')} ${esc(p.version || '')}` +
+      (b.nodes ? `: ${Number(b.nodes).toLocaleString('en')} declarations` : '') + ` (<code>${esc(b.spec)}</code>)`],
+    ['Hashes', Object.entries(b.hasher || {}).map(([k, v]) => `${esc(k)} <code>${esc(v)}</code>`).join(', ')],
+    ['Kernel check', b.kernel ? 'in the dataset: each declaration checked against only what it rests on' : 'not run for this dataset'],
+    ['Catalogue', b.catalogue ? `${gh(b.catalogue.repo, '/releases/tag/' + b.catalogue.tag, esc(b.catalogue.tag))} of ${gh(b.catalogue.repo, '', 'mathlib-catalogue')}, merged in`
+      : 'not merged into this build'],
+    ['Tools', ['referee-site', 'evidence-core', 'evidence-store'].filter(k => t[k]).map(k => `${esc(k)} ${esc(t[k])}`)
+      .concat(['reviewed-by-pilot', 'trust-web'].filter(k => t[k]).map(k => `${esc(k)} <code>${esc(t[k])}</code>`)).join(', ')],
+    ['Built', `${esc((b.built || '').replace('T', ' ').replace('Z', ' UTC'))}${b.run ? ` by <a href="${esc(b.run)}">this run</a>` : ''}`],
+  ];
+  document.getElementById('build').innerHTML = `<div class="build"><h3>This build</h3><table><tbody>${rows.map(([k, v]) =>
+    `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`;
+}).catch(() => {});
 </script>
 </body>
 </html>

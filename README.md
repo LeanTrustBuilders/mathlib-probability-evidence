@@ -4,7 +4,7 @@ An evidence store about [Mathlib](https://github.com/leanprover-community/mathli
 theory, and four front ends that show it, published at
 <https://leantrustbuilders.github.io/mathlib-probability-evidence/>:
 
-- **the site** (`site/`): Mathlib's probability theory read as a referee does, with every
+- **the Referee site** (`site/`): Mathlib's probability theory read as a referee does, with every
   declaration's reviews and coverage under the reader's policy;
 - **trust's front end** (`trust/`): the dependency tree of a declaration, with what reviewers accepted
   marked as trusted;
@@ -38,4 +38,5 @@ such.
   [trust-web](https://github.com/LeanTrustBuilders/trust-web) on `trust-site trust-index --modules`, and
   the page of [Reviewed-by](https://github.com/LeanTrustBuilders/reviewed-by-pilot) with the settings
   `site/reviewed-by.json`.
-- `site/index.html`: the landing page, which lists the records with links into each front end.
+- `site/index.html`: the landing page: how the pieces fit together, the records with links into each
+  front end, and what this build was made from (`site/build_info.py` writes it as `build.json`).
