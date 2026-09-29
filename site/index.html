@@ -350,10 +350,8 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&
 // A Lean name, which may break after each dot.
 const lname = s => esc(s).replace(/\./g, '.<wbr>');
 const VERDICT = {accept: 'accepted', problem: 'problem', question: 'question'};
-// The stores, by the repository they are kept in.
-const STORES = {'LeanTrustBuilders/mathlib-probability-evidence': 'Mathlib probability',
-  'LeanTrustBuilders/reviewed-by-pilot': 'Tau Ceti', 'LeanTrustBuilders/site-pilot': 'LeanMachineLearning'};
-const storeLink = repo => `<a href="https://github.com/${esc(repo)}/tree/main/evidence">${esc(STORES[repo] || repo)}</a>`;
+// A store, {repo, name}, by its name.
+const storeLink = s => `<a href="https://github.com/${esc(s.repo)}/tree/main/evidence">${esc(s.name)}</a>`;
 function what(r) {
   if (r.kind === 'review') return `<span class="v-${esc(r.verdict)}">${esc(VERDICT[r.verdict] || r.verdict)}</span>` +
     (r.category ? ` <span class="muted">${esc(r.category)}</span>` : '');
@@ -413,7 +411,7 @@ fetch('build.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(b
       (b.nodes ? `: ${Number(b.nodes).toLocaleString('en')} declarations` : '') + ` (<code>${esc(b.spec)}</code>)`],
     ['Hashes', Object.entries(b.hasher || {}).map(([k, v]) => `${esc(k)} <code>${esc(v)}</code>`).join(', ')],
     ['Kernel check', b.kernel ? 'in the dataset: each declaration checked against only what it rests on' : 'not run for this dataset'],
-    ['Imports', (b.imports || []).length ? b.imports.map(i => `${storeLink(i.repo)}` +
+    ['Imports', (b.imports || []).length ? b.imports.map(i => `${storeLink(i)}` +
       (i.commit ? ` at ${gh(i.repo, '/tree/' + i.commit, '<code>' + esc(i.commit.slice(0, 12)) + '</code>')}` : '')).join(', ') : 'none'],
     ['Catalogue', b.catalogue ? `${gh(b.catalogue.repo, '/releases/tag/' + b.catalogue.tag, esc(b.catalogue.tag))} of ${gh(b.catalogue.repo, '', 'mathlib-catalogue')}, merged in`
       : 'not merged into this build'],

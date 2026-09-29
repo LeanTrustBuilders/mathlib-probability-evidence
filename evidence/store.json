@@ -1,5 +1,6 @@
 {
- "spec": "ltb-evidence-store/0",
+ "spec": "ltb-evidence-store/1",
+ "name": "Mathlib probability",
  "library": {
   "repo": "leanprover-community/mathlib4",
   "root": "Mathlib"

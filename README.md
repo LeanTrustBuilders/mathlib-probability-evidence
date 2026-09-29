@@ -42,9 +42,9 @@ such.
 
 ## How it is built
 
-- `evidence/store.json`: the library (Mathlib, root `Mathlib`), where its datasets are (the releases
-  `mathlib-dataset-<commit12>` of [Mathlib Explorer](https://github.com/LeanTrustBuilders/mathlib-explorer)),
-  and the claims (the probability results of Mathlib's lists of famous theorems).
+- `evidence/store.json`: the store's name (Mathlib probability), the library (Mathlib, root `Mathlib`),
+  where its datasets are (the releases `mathlib-dataset-<commit12>` of
+  [Mathlib Explorer](https://github.com/LeanTrustBuilders/mathlib-explorer)), and the claims (the probability results of Mathlib's lists of famous theorems).
 - `.github/workflows/evidence-intake.yml` and `evidence-check.yml`: the store, by
   [evidence-store](https://github.com/LeanTrustBuilders/evidence-store).
 - `.github/workflows/pages.yml`: the newest dataset, with the
