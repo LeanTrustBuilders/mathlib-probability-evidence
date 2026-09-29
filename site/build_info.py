@@ -10,7 +10,7 @@ from pathlib import Path
 
 import evidence_core
 import evidence_store
-import trust_site
+import referee_site
 
 env = os.environ.get
 meta = json.loads((Path(env("DATASET")) / "meta.json").read_text(encoding="utf-8"))
@@ -34,7 +34,7 @@ print(json.dumps({
     "catalogue": {"repo": "LeanTrustBuilders/mathlib-catalogue", "tag": env("CATALOGUE_TAG")}
                  if env("CATALOGUE_TAG") else None,
     "imports": [{"repo": i["repo"], "commit": i.get("commit")} for i in imports],
-    "tools": {"referee-site": trust_site.__version__, "evidence-core": evidence_core.__version__,
+    "tools": {"referee-site": referee_site.__version__, "evidence-core": evidence_core.__version__,
               "evidence-store": evidence_store.__version__, "trust-web": (env("TW_COMMIT") or "")[:7]},
     "run": f"{env('GITHUB_SERVER_URL')}/{env('GITHUB_REPOSITORY')}/actions/runs/{env('GITHUB_RUN_ID')}"
            if env("GITHUB_RUN_ID") else None,

@@ -30,7 +30,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: trust-site, with evidence-core and evidence-store
+      - name: referee-site, with evidence-core and evidence-store
         run: pip install -q git+https://github.com/LeanTrustBuilders/referee-site
       - name: The dataset, with the Mathlib catalogue
         run: |
@@ -64,13 +64,13 @@ jobs:
           git -C "$RUNNER_TEMP/mathlib" checkout -q "$(jq -r .library.commit "$DATASET/meta.json")"
       - name: The Referee site of Mathlib's probability theory
         run: |
-          trust-site build --dataset "$DATASET" --source "$RUNNER_TEMP/mathlib" --evidence evidence --imports "$IMPORTS" \
+          referee-site build --dataset "$DATASET" --source "$RUNNER_TEMP/mathlib" --evidence evidence --imports "$IMPORTS" \
             --modules Mathlib.Probability --modules Mathlib.InformationTheory $CLAIMS \
             --title "Mathlib: probability" --repo leanprover-community/mathlib4 \
             --issues-repo "$GITHUB_REPOSITORY" --out _site/site
       - name: One claim's page
         run: |
-          trust-site claim --dataset "$DATASET" --store evidence --imports "$IMPORTS" --source "$RUNNER_TEMP/mathlib" \
+          referee-site claim --dataset "$DATASET" --store evidence --imports "$IMPORTS" --source "$RUNNER_TEMP/mathlib" \
             --repo "$GITHUB_REPOSITORY" --out _site/claim
       - uses: actions/setup-node@v4
         with:
@@ -82,7 +82,7 @@ jobs:
           (cd "$RUNNER_TEMP/trust-web" && npm ci --no-audit --no-fund &&
             VITE_TRUST_SERVER=none VITE_MARKS_API=none VITE_DEFAULT_INDEX=probability npm run build)
           mkdir -p _site/trust && cp -r "$RUNNER_TEMP/trust-web/dist/." _site/trust/
-          trust-site trust-index --dataset "$DATASET" --out _site/trust/index --name probability \
+          referee-site trust-index --dataset "$DATASET" --out _site/trust/index --name probability \
             --evidence evidence --imports "$IMPORTS" --modules Mathlib.Probability --modules Mathlib.InformationTheory \
             --decl-url "../site/#/d/{name}" --start "$(jq -r '.claims[0]' evidence/store.json)"
       - name: The landing page, with the store's records and how this build was made

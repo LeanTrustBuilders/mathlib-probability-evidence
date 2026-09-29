@@ -49,9 +49,9 @@ such.
   [evidence-store](https://github.com/LeanTrustBuilders/evidence-store).
 - `.github/workflows/pages.yml`: the newest dataset, with the
   [Mathlib catalogue](https://github.com/LeanTrustBuilders/mathlib-catalogue) merged in, the stores this
-  one imports (`evidence-store fetch-imports`), and the three front ends from them: `trust-site build`
-  and `trust-site claim` from [referee-site](https://github.com/LeanTrustBuilders/referee-site), and
-  [trust-web](https://github.com/LeanTrustBuilders/trust-web) on `trust-site trust-index --modules`, each
+  one imports (`evidence-store fetch-imports`), and the three front ends from them:
+  [referee-site](https://github.com/LeanTrustBuilders/referee-site)'s `build` and `claim`, and
+  [trust-web](https://github.com/LeanTrustBuilders/trust-web) on `referee-site trust-index --modules`, each
   with `--imports`.
 - `site/index.html`: the landing page: how the pieces fit together and how the store is shared, the
   records with links into each front end (`site/records.py`: this store's, and the imported ones about
