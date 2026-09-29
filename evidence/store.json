@@ -20,5 +20,13 @@
   "ProbabilityTheory.IsGaussian.exists_integrable_exp_sq",
   "ProbabilityTheory.tendsto_choose_mul_pow_of_tendsto_mul_atTop"
  ],
- "maintainers": []
+ "maintainers": [],
+ "imports": [
+  {
+   "repo": "LeanTrustBuilders/site-pilot"
+  },
+  {
+   "repo": "LeanTrustBuilders/reviewed-by-pilot"
+  }
+ ]
 }

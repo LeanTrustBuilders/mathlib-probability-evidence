@@ -1,7 +1,7 @@
 # Evidence about Mathlib's probability theory
 
 An evidence store about [Mathlib](https://github.com/leanprover-community/mathlib4)'s probability
-theory, and four front ends that show it, published at
+theory, shared with the libraries built on Mathlib, and three front ends that show it, published at
 <https://leantrustbuilders.github.io/mathlib-probability-evidence/>:
 
 - **the Referee site** (`site/`): Mathlib's probability theory read as a referee does, with every
@@ -9,11 +9,27 @@ theory, and four front ends that show it, published at
 - **trust's front end** (`trust/`): the dependency tree of a declaration, with what reviewers accepted
   marked as trusted;
 - **one claim's page** (`claim/`): the strong law of large numbers, with every review of what it
-  rests on;
-- **Reviewed-by** (`reviewed-by/`): every declaration, searchable, with its review marks and tests.
+  rests on.
 
-All four read the same records (`evidence/`) against the same dataset of Mathlib, so a record shows
+All three read the same records (`evidence/`) against the same dataset of Mathlib, so a record shows
 up in each, with its status against the current code.
+
+## Shared with the libraries built on Mathlib
+
+A record names its declaration by what it means, not by the library it was made in, so it applies
+wherever the declaration is used (S3's
+[imported records](https://github.com/LeanTrustBuilders/specs/blob/main/S3-evidence.md#imported-records)):
+
+- [Tau Ceti's Reviewed-by page](https://leantrustbuilders.github.io/reviewed-by-pilot/) and
+  [LeanMachineLearning's site](https://leantrustbuilders.github.io/site-pilot/lml/) import this
+  store: the reviews made here of the Mathlib declarations they rest on show on their pages, marked
+  with this store, beside their own;
+- this store imports theirs (`imports` in `evidence/store.json`): a review of a Mathlib declaration
+  filed from either library is kept in that library's store, and shows here too.
+
+A page shows an imported record with its status against its own dataset, without the buttons that
+would change its state (its own store's to set), and the reader's policy says whether imported
+reviews count.
 
 ## Adding to it
 
@@ -32,11 +48,12 @@ such.
 - `.github/workflows/evidence-intake.yml` and `evidence-check.yml`: the store, by
   [evidence-store](https://github.com/LeanTrustBuilders/evidence-store).
 - `.github/workflows/pages.yml`: the newest dataset, with the
-  [Mathlib catalogue](https://github.com/LeanTrustBuilders/mathlib-catalogue) merged in, and the four
-  front ends from it: `trust-site build` and `trust-site claim` from
-  [referee-site](https://github.com/LeanTrustBuilders/referee-site),
-  [trust-web](https://github.com/LeanTrustBuilders/trust-web) on `trust-site trust-index --modules`, and
-  the page of [Reviewed-by](https://github.com/LeanTrustBuilders/reviewed-by-pilot) with the settings
-  `site/reviewed-by.json`.
-- `site/index.html`: the landing page: how the pieces fit together, the records with links into each
-  front end, and what this build was made from (`site/build_info.py` writes it as `build.json`).
+  [Mathlib catalogue](https://github.com/LeanTrustBuilders/mathlib-catalogue) merged in, the stores this
+  one imports (`evidence-store fetch-imports`), and the three front ends from them: `trust-site build`
+  and `trust-site claim` from [referee-site](https://github.com/LeanTrustBuilders/referee-site), and
+  [trust-web](https://github.com/LeanTrustBuilders/trust-web) on `trust-site trust-index --modules`, each
+  with `--imports`.
+- `site/index.html`: the landing page: how the pieces fit together and how the store is shared, the
+  records with links into each front end (`site/records.py`: this store's, and the imported ones about
+  Mathlib's declarations), and what this build was made from (`site/build_info.py` writes it as
+  `build.json`).

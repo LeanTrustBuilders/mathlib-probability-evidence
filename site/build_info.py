@@ -1,6 +1,6 @@
 """What the landing page says about this build: the dataset (which Mathlib, read by what, kept where),
 the catalogue merged into it, and the tools' versions. The Pages workflow runs it after building the
-front ends, with the environment it set (DATASET, CATALOGUE_TAG, RB_COMMIT, TW_COMMIT), and writes
+front ends, with the environment it set (DATASET, CATALOGUE_TAG, IMPORTS, TW_COMMIT), and writes
 its output to build.json.
 """
 import json
@@ -18,6 +18,8 @@ store = json.loads(Path("evidence/store.json").read_text(encoding="utf-8"))
 commit = meta["library"]["commit"]
 where = store["datasets"]
 facets = [f["name"] for f in meta.get("facets", [])]
+manifest = Path(env("IMPORTS") or ".", "imports.json")
+imports = json.loads(manifest.read_text(encoding="utf-8")) if manifest.exists() else []
 
 print(json.dumps({
     "library": {"repo": meta["library"]["repo"], "commit": commit},
@@ -31,9 +33,9 @@ print(json.dumps({
                 "tag": where["tag"].replace("{commit12}", commit[:12]).replace("{commit}", commit)},
     "catalogue": {"repo": "LeanTrustBuilders/mathlib-catalogue", "tag": env("CATALOGUE_TAG")}
                  if env("CATALOGUE_TAG") else None,
+    "imports": [{"repo": i["repo"], "commit": i.get("commit")} for i in imports],
     "tools": {"referee-site": trust_site.__version__, "evidence-core": evidence_core.__version__,
-              "evidence-store": evidence_store.__version__,
-              "reviewed-by-pilot": (env("RB_COMMIT") or "")[:7], "trust-web": (env("TW_COMMIT") or "")[:7]},
+              "evidence-store": evidence_store.__version__, "trust-web": (env("TW_COMMIT") or "")[:7]},
     "run": f"{env('GITHUB_SERVER_URL')}/{env('GITHUB_REPOSITORY')}/actions/runs/{env('GITHUB_RUN_ID')}"
            if env("GITHUB_RUN_ID") else None,
     "built": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),

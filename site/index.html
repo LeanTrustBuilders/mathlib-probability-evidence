@@ -77,13 +77,15 @@
 </head>
 <body>
 <main>
-  <h1>One evidence store, four front ends</h1>
-  <p class="lead">Reviews, questions and proposed tests about Mathlib's probability theory live in one
-  place: the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">evidence
-  store</a> of this repository, as records in git. Each front end below reads the same records against
-  the same dataset of Mathlib, so a review written once shows up in all four, with its status against
-  the current code.</p>
+  <h1>One evidence store, shared</h1>
+  <p class="lead">Reviews, questions and proposed tests about Mathlib's probability theory are records
+  in the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">evidence
+  store</a> of this repository. A record names its declaration by what the declaration means, not by
+  the library it was made in, so it applies wherever that declaration is used: the front ends here
+  show it on Mathlib, and libraries built on Mathlib show it on their own pages, beside their own
+  reviews.</p>
 
+  <h2>Here: Mathlib's probability theory</h2>
   <div class="ends">
     <div class="end">
       <h3><a href="site/">Referee site</a></h3>
@@ -100,19 +102,51 @@
       <p>The strong law of large numbers: the statement, what it rests on, and every review,
       question and reply about those declarations, as threads.</p>
     </div>
+  </div>
+
+  <h2>Downstream: libraries that import this store</h2>
+  <div class="ends">
     <div class="end">
-      <h3><a href="reviewed-by/">Reviewed-by</a></h3>
-      <p>Every declaration of Mathlib's probability theory, searchable, with its review marks and
-      tests, and a form to add one from the browser.</p>
+      <h3><a href="https://leantrustbuilders.github.io/reviewed-by-pilot/#d=ProbabilityTheory.variance">Tau Ceti's Reviewed-by page</a></h3>
+      <p>Tau Ceti keeps its reviews in <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot/tree/main/evidence">its
+      own store</a>, and imports this one: the reviews made here of <code>variance</code>,
+      <code>IndepFun</code>, <code>IdentDistrib</code> and the strong law, which Tau Ceti rests on, show on its
+      page, marked as coming from this store.</p>
+    </div>
+    <div class="end">
+      <h3><a href="https://leantrustbuilders.github.io/site-pilot/lml/#/community">LeanMachineLearning's site</a></h3>
+      <p>Its <a href="https://github.com/LeanTrustBuilders/site-pilot/tree/main/evidence">store</a> imports this
+      one too: wherever one of its declarations rests on a Mathlib definition reviewed here, the list
+      of what it rests on says so.</p>
     </div>
   </div>
+
+  <h2>How sharing works</h2>
+  <ul>
+    <li><b>A store names the stores it imports</b>, in its <code>store.json</code>. Tau Ceti's and
+    LeanMachineLearning's name this one, and this one names theirs, so a review of a Mathlib
+    declaration filed from either library shows here too. An import is one level deep: a store's own
+    imports are not followed.</li>
+    <li><b>Only what applies is shown.</b> A record from another store appears where its declaration
+    is one of the dataset's, with its status against it: current, or made on an earlier version.
+    Records about the other library's own declarations are left out.</li>
+    <li><b>Each store keeps its rules.</b> Only a record's own store, or its author, can change its
+    state (withdraw it, mark a problem fixed), so a page shows an imported record without the buttons
+    that would.</li>
+    <li><b>The reader decides whether it counts.</b> A switch in the reader's policy says whether
+    reviews from imported stores count towards a claim's coverage.</li>
+    <li><b>Nothing is copied.</b> Each build fetches the imported stores afresh and says at which commit
+    (below). The rules are S3's <a href="https://github.com/LeanTrustBuilders/specs/blob/main/S3-evidence.md#imported-records">imported
+    records</a>.</li>
+  </ul>
 
   <h2>Add to it</h2>
   <p>Anyone with a GitHub account can review a declaration, report a problem, ask a question or
   propose a test, with the <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/issues/new/choose">issue
-  forms</a> (or the buttons on each front end). A bot turns the issue into a record, and the four
-  front ends are rebuilt. Records are never anonymous: each names the GitHub account it came from, and
-  an AI agent's are labelled as such.</p>
+  forms</a> (or the buttons on each front end). A bot turns the issue into a record, and the front
+  ends are rebuilt. A review of a Mathlib declaration filed from Tau Ceti's page or LeanMachineLearning's
+  site is kept in that library's store, and shows here too. Records are never anonymous: each names
+  the GitHub account it came from, and an AI agent's are labelled as such.</p>
 
   <h2>How it is made</h2>
   <p>Each piece is open, in its own repository of
@@ -139,17 +173,19 @@
     <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/tree/main/evidence">evidence/</a>
     in this repository. <a href="https://github.com/LeanTrustBuilders/evidence-store">evidence-store</a>
     turns the issues opened with the forms into records, keyed by the declaration's hashes in the
-    dataset, and checks every change to the store.
+    dataset, checks every change to the store, and fetches the stores this one imports.
     <a href="https://github.com/LeanTrustBuilders/evidence-core">evidence-core</a> reads the records
     against the dataset: whether each still applies to the current code, what changed underneath it,
     whether a claim is covered under a reader's policy, and what to review next.</li>
     <li><b>The front ends.</b> <a href="https://github.com/LeanTrustBuilders/referee-site">referee-site</a>
     builds the Referee site and the claim's page, and the index that trust's front end
-    (<a href="https://github.com/LeanTrustBuilders/trust-web">trust-web</a>) reads;
-    <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot">Reviewed-by</a> builds its page
-    from the same dataset and store. This repository's
+    (<a href="https://github.com/LeanTrustBuilders/trust-web">trust-web</a>) reads, from the dataset,
+    this store and the stores it imports. This repository's
     <a href="https://github.com/LeanTrustBuilders/mathlib-probability-evidence/blob/main/.github/workflows/pages.yml">Pages
-    workflow</a> builds all four after every new record.</li>
+    workflow</a> builds all three after every new record. Tau Ceti's
+    <a href="https://github.com/LeanTrustBuilders/reviewed-by-pilot">Reviewed-by page</a> and
+    LeanMachineLearning's <a href="https://github.com/LeanTrustBuilders/site-pilot">site</a> are built in
+    their own repositories, from their own datasets and stores, importing this one.</li>
   </ol>
   <p>The design behind the suite is in
   <a href="https://github.com/LeanTrustBuilders/design">LeanTrustBuilders/design</a>.</p>
@@ -271,7 +307,7 @@
         <text class="q" x="560" y="788">Tau Ceti's page, the</text>
         <text class="q" x="560" y="804">suite behind it</text>
       </a>
-      <text class="here" x="560" y="822">here: <a href="reviewed-by/">reviewed-by/</a></text>
+      <text class="here" x="560" y="822">imports this store: <a href="https://leantrustbuilders.github.io/reviewed-by-pilot/">page</a></text>
 
       <g class="wire">
         <path d="M272 152H232" marker-end="url(#suite-arrow)"/>
@@ -298,6 +334,8 @@
   </figure>
 
   <h2>The records</h2>
+  <p class="muted">This store's, and those of the stores it imports about Mathlib's declarations, marked
+  with their store.</p>
   <div id="records"><p class="muted">Loading…</p></div>
 </main>
 <script>
@@ -341,9 +379,9 @@ fetch('records.jsonl').then(r => r.ok ? r.text() : Promise.reject(r.status)).the
     return `<tr>
     <td class="decl">${lname(decl)}</td>
     <td>${what(r)}${st}</td>
-    <td class="hide-sm">${who(r.by)}</td>
+    <td class="hide-sm">${who(r.by)}${r.source ? ` <span class="muted">· from <a href="https://github.com/${esc(r.source)}">${esc(r.source.split('/')[1])}</a></span>` : ''}</td>
     <td class="hide-sm muted">${esc((r.at || '').slice(0, 10))}</td>
-    <td class="links"><a href="site/#/d/${encodeURIComponent(decl)}">Referee</a><a href="trust/?repo=probability&decl=${encodeURIComponent(decl)}">trust</a><a href="reviewed-by/#d=${encodeURIComponent(decl)}">Reviewed-by</a>${url ? `<a href="${esc(url)}">issue</a>` : ''}</td>
+    <td class="links"><a href="site/#/d/${encodeURIComponent(decl)}">Referee</a><a href="trust/?repo=probability&decl=${encodeURIComponent(decl)}">trust</a><a href="https://leantrustbuilders.github.io/reviewed-by-pilot/#d=${encodeURIComponent(decl)}">Tau Ceti</a>${url ? `<a href="${esc(url)}">issue</a>` : ''}</td>
   </tr>`;
   }).join('');
   document.getElementById('records').innerHTML = `<table><thead><tr><th>Declaration</th><th>What</th>
@@ -363,10 +401,12 @@ fetch('build.json').then(r => r.ok ? r.json() : Promise.reject(r.status)).then(b
       (b.nodes ? `: ${Number(b.nodes).toLocaleString('en')} declarations` : '') + ` (<code>${esc(b.spec)}</code>)`],
     ['Hashes', Object.entries(b.hasher || {}).map(([k, v]) => `${esc(k)} <code>${esc(v)}</code>`).join(', ')],
     ['Kernel check', b.kernel ? 'in the dataset: each declaration checked against only what it rests on' : 'not run for this dataset'],
+    ['Imports', (b.imports || []).length ? b.imports.map(i => `${gh(i.repo, '', esc(i.repo.split('/')[1]))}` +
+      (i.commit ? ` at ${gh(i.repo, '/tree/' + i.commit, '<code>' + esc(i.commit.slice(0, 12)) + '</code>')}` : '')).join(', ') : 'none'],
     ['Catalogue', b.catalogue ? `${gh(b.catalogue.repo, '/releases/tag/' + b.catalogue.tag, esc(b.catalogue.tag))} of ${gh(b.catalogue.repo, '', 'mathlib-catalogue')}, merged in`
       : 'not merged into this build'],
     ['Tools', ['referee-site', 'evidence-core', 'evidence-store'].filter(k => t[k]).map(k => `${esc(k)} ${esc(t[k])}`)
-      .concat(['reviewed-by-pilot', 'trust-web'].filter(k => t[k]).map(k => `${esc(k)} <code>${esc(t[k])}</code>`)).join(', ')],
+      .concat(['trust-web'].filter(k => t[k]).map(k => `${esc(k)} <code>${esc(t[k])}</code>`)).join(', ')],
     ['Built', `${esc((b.built || '').replace('T', ' ').replace('Z', ' UTC'))}${b.run ? ` by <a href="${esc(b.run)}">this run</a>` : ''}`],
   ];
   document.getElementById('build').innerHTML = `<div class="build"><h3>This build</h3><table><tbody>${rows.map(([k, v]) =>

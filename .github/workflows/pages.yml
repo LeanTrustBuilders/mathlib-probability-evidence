@@ -1,7 +1,8 @@
-# The four front ends of the store, built from one dataset and one store (evidence/), and published
-# together: the Referee site of Mathlib's probability theory (site/), one claim's page (claim/), trust's
-# front end (trust/), and Reviewed-by (reviewed-by/). Intake runs this after it records something, so every front end shows every
-# record.
+# The front ends of the store, built from one dataset, the store (evidence/) and the stores it imports
+# (the libraries built on Mathlib, whose reviews of Mathlib's declarations show here too), and published
+# together: the Referee site of Mathlib's probability theory (site/), one claim's page (claim/) and
+# trust's front end (trust/). Intake runs this after it records something, so every front end shows
+# every record.
 name: Pages
 
 on:
@@ -51,6 +52,10 @@ jobs:
             fi
           fi
           echo "DATASET=$d" >> "$GITHUB_ENV"
+          # The stores this one imports (evidence/store.json): the libraries built on Mathlib, whose
+          # reviews of Mathlib's declarations show here too.
+          evidence-store fetch-imports --store evidence --out "$RUNNER_TEMP/imports"
+          echo "IMPORTS=$RUNNER_TEMP/imports" >> "$GITHUB_ENV"
           echo "CLAIMS=$(jq -r '.claims[] | "--claim " + .' evidence/store.json | paste -sd' ')" >> "$GITHUB_ENV"
       - name: Mathlib at the dataset's commit
         run: |
@@ -59,22 +64,14 @@ jobs:
           git -C "$RUNNER_TEMP/mathlib" checkout -q "$(jq -r .library.commit "$DATASET/meta.json")"
       - name: The Referee site of Mathlib's probability theory
         run: |
-          trust-site build --dataset "$DATASET" --source "$RUNNER_TEMP/mathlib" --evidence evidence \
+          trust-site build --dataset "$DATASET" --source "$RUNNER_TEMP/mathlib" --evidence evidence --imports "$IMPORTS" \
             --modules Mathlib.Probability --modules Mathlib.InformationTheory $CLAIMS \
             --title "Mathlib: probability" --repo leanprover-community/mathlib4 \
             --issues-repo "$GITHUB_REPOSITORY" --out _site/site
       - name: One claim's page
         run: |
-          trust-site claim --dataset "$DATASET" --store evidence --source "$RUNNER_TEMP/mathlib" \
+          trust-site claim --dataset "$DATASET" --store evidence --imports "$IMPORTS" --source "$RUNNER_TEMP/mathlib" \
             --repo "$GITHUB_REPOSITORY" --out _site/claim
-      - name: Reviewed-by
-        run: |
-          git clone -q --depth 1 https://github.com/LeanTrustBuilders/reviewed-by-pilot "$RUNNER_TEMP/rb"
-          echo "RB_COMMIT=$(git -C "$RUNNER_TEMP/rb" rev-parse HEAD)" >> "$GITHUB_ENV"
-          python3 "$RUNNER_TEMP/rb/scripts/dataset_declarations.py" --dataset "$DATASET" --clone "$RUNNER_TEMP/mathlib" \
-            --settings site/reviewed-by.json --out "$RUNNER_TEMP/rb-declarations.json"
-          python3 "$RUNNER_TEMP/rb/scripts/build_site.py" --dataset "$DATASET" --store evidence \
-            --settings site/reviewed-by.json --index "$RUNNER_TEMP/rb-declarations.json" --out _site/reviewed-by
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -86,12 +83,12 @@ jobs:
             VITE_TRUST_SERVER=none VITE_MARKS_API=none VITE_DEFAULT_INDEX=probability npm run build)
           mkdir -p _site/trust && cp -r "$RUNNER_TEMP/trust-web/dist/." _site/trust/
           trust-site trust-index --dataset "$DATASET" --out _site/trust/index --name probability \
-            --evidence evidence --modules Mathlib.Probability --modules Mathlib.InformationTheory \
+            --evidence evidence --imports "$IMPORTS" --modules Mathlib.Probability --modules Mathlib.InformationTheory \
             --decl-url "../site/#/d/{name}" --start "$(jq -r '.claims[0]' evidence/store.json)"
       - name: The landing page, with the store's records and how this build was made
         run: |
           cp site/index.html _site/index.html
-          cat evidence/records/*.jsonl > _site/records.jsonl 2>/dev/null || : > _site/records.jsonl
+          python3 site/records.py > _site/records.jsonl
           python3 site/build_info.py > _site/build.json
       - uses: actions/upload-pages-artifact@v3
         with:
