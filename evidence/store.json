@@ -24,7 +24,7 @@
  "maintainers": [],
  "imports": [
   {
-   "repo": "LeanTrustBuilders/site-pilot"
+   "repo": "LeanMachineLearning/LML-evidence"
   },
   {
    "repo": "LeanTrustBuilders/reviewed-by-pilot"

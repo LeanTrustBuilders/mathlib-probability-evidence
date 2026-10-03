@@ -21,7 +21,7 @@ wherever the declaration is used (S3's
 [imported records](https://github.com/LeanTrustBuilders/specs/blob/main/S3-evidence.md#imported-records)):
 
 - [Tau Ceti's Reviewed-by page](https://leantrustbuilders.github.io/reviewed-by-pilot/) and
-  [LeanMachineLearning's site](https://leantrustbuilders.github.io/site-pilot/lml/) import this
+  [LeanMachineLearning's site](https://leanmachinelearning.org/LML/exposition/) import this
   store: the reviews made here of the Mathlib declarations they rest on show on their pages, marked
   with this store, beside their own;
 - this store imports theirs (`imports` in `evidence/store.json`): a review of a Mathlib declaration
