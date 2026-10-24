@@ -20,7 +20,7 @@ A record names its declaration by what it means, not by the library it was made 
 wherever the declaration is used (S3's
 [imported records](https://github.com/LeanTrustBuilders/specs/blob/main/S3-evidence.md#imported-records)):
 
-- [Tau Ceti's Reviewed-by page](https://leantrustbuilders.github.io/reviewed-by-pilot/) and
+- [Tau Ceti Review](https://cbirkbeck.github.io/tauceti-reviewed-by-test/) and
   [LeanMachineLearning's site](https://leanmachinelearning.org/LML/exposition/) import this
   store: the reviews made here of the Mathlib declarations they rest on show on their pages, marked
   with this store, beside their own;
