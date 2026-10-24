@@ -34,12 +34,18 @@ jobs:
         run: pip install -q git+https://github.com/LeanTrustBuilders/referee-site
       - name: The dataset, with the Mathlib catalogue
         run: |
-          # The newest dataset the store's config points to (Mathlib Explorer's releases), and the
-          # Mathlib catalogue's (domains, characterizations written outside Mathlib) merged in when
-          # both describe the same Mathlib.
-          d=$(evidence-store dataset --store evidence --out "$RUNNER_TEMP/ds" | tail -1)
+          # The newest Mathlib catalogue's dataset (domains, characterizations written outside
+          # Mathlib), and the dataset the store's config points to (Mathlib Explorer's releases) of
+          # the Mathlib the catalogue is built on, so that the two merge: the site follows the
+          # catalogue, not Mathlib. Without a catalogue, the newest dataset.
           ctag=$(gh release list -R LeanTrustBuilders/mathlib-catalogue --limit 100 --json tagName,createdAt \
             --jq '[.[] | select(.tagName | startswith("dataset-"))] | sort_by(.createdAt) | last | .tagName // ""')
+          mathlib=""
+          if [ -n "$ctag" ]; then
+            mathlib=$(gh api "repos/LeanTrustBuilders/mathlib-catalogue/contents/lake-manifest.json?ref=$ctag" --jq .content |
+              base64 -d | jq -r '.packages[] | select(.name == "mathlib") | .rev')
+          fi
+          d=$(evidence-store dataset --store evidence ${mathlib:+--commit "$mathlib"} --out "$RUNNER_TEMP/ds" | tail -1)
           if [ -n "$ctag" ]; then
             mkdir -p "$RUNNER_TEMP/catalogue"
             gh release download "$ctag" -R LeanTrustBuilders/mathlib-catalogue -p dataset.tar.gz -D "$RUNNER_TEMP/catalogue-release"
