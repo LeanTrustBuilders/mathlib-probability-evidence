@@ -47,8 +47,9 @@ such.
   [Mathlib Explorer](https://github.com/LeanTrustBuilders/mathlib-explorer)), and the claims (the probability results of Mathlib's lists of famous theorems).
 - `.github/workflows/evidence-intake.yml` and `evidence-check.yml`: the store, by
   [evidence-store](https://github.com/LeanTrustBuilders/evidence-store).
-- `.github/workflows/pages.yml`: the newest dataset, with the
-  [Mathlib catalogue](https://github.com/LeanTrustBuilders/mathlib-catalogue) merged in, the stores this
+- `.github/workflows/pages.yml`: the dataset of the Mathlib the
+  [Mathlib catalogue](https://github.com/LeanTrustBuilders/mathlib-catalogue) is built on, with the
+  catalogue merged in, the stores this
   one imports (`evidence-store fetch-imports`), and the three front ends from them:
   [referee-site](https://github.com/LeanTrustBuilders/referee-site)'s `build` and `claim`, and
   [trust-web](https://github.com/LeanTrustBuilders/trust-web) on `referee-site trust-index --modules`, each
